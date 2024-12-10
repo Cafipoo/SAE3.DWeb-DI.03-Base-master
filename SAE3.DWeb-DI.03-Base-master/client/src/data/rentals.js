@@ -21,4 +21,9 @@ RentalsData.getRentalSales = async function () {
     return data;
 };
 
+RentalsData.getRentalsEvolution = async function () {
+    let data = await getRequest("rentals/rentalEvolution");
+    return data;
+}
+
 export { RentalsData };

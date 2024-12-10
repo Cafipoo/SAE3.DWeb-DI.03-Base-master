@@ -3,6 +3,7 @@ import { MoviesView } from "./ui/movie/index.js";
 import { SalesData } from "./data/sales.js";
 import { TopView } from "./ui/top/index.js";
 import { RentalsData } from "./data/rentals.js";
+import { EvoView } from "./ui/evolution/index.js";
 
 let C = {};
 
@@ -14,6 +15,7 @@ let V = {
     // header: document.querySelector("#header"),
     movies: document.querySelector("#movie"),
     top3: document.querySelector("#top"),
+    evolution: document.querySelector("#evolution"),
 };
 
 V.init = function(){
@@ -39,6 +41,58 @@ C.loadMovies = async function(){
     } catch (error) {
         console.error("Error loading movies:", error);
     }
+}
+C.loadEvolution = async function(){
+    try {
+        let data = await RentalsData.getRentalsEvolution();
+        let data2 = await SalesData.getSalesEvolution();
+        V.renderEvolution(data, data2);
+    } catch (error) {
+        console.error("Error loading evolution:", error);
+    }
+
+}
+V.renderEvolution = function(data, data2){
+    V.evolution.innerHTML = EvoView.render(data, data2);
+    console.log(data, data2);
+    var options = {
+        series: [{
+            name: "Rentals Evolution",
+            data: data.map(item => item.total_rentals).reverse()
+        }, {
+            name: "Sales Evolution",
+            data: data2.map(item => item.total_sales).reverse()
+        }],
+        chart: {
+            height: 350,
+            type: 'line',
+            zoom: {
+                enabled: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'straight'
+        },
+        title: {
+            text: 'Rentals and Sales Evolution last 6 months',
+            align: 'left'
+        },
+        grid: {
+            row: {
+                colors: ['#f3f3f3', 'transparent'],
+                opacity: 0.5
+            },
+        },
+        xaxis: {
+            categories: data.map(item => item.month).reverse(),
+        }
+    };
+
+        var chart = new ApexCharts(document.querySelector("#chartEvo"), options);
+        chart.render();
 }
 
 V.renderTop= function(dataTop){
@@ -92,4 +146,5 @@ V.renderMovies = function(data, data2){
 
 C.loadTop();
 C.loadMovies();
+C.loadEvolution();
 C.init();
