@@ -18,7 +18,7 @@ SalesData.save = async function (sales) {
 };
 
 SalesData.getTotalSales = async function () {
-    let data = await getRequest("sales/total-for-december");
+    let data = await getRequest("sales/salesThisMonth");
     return data;
 };
 export { SalesData };

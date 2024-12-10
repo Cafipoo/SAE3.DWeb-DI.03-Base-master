@@ -16,6 +16,9 @@ MoviesData.save = async function (movie) {
     let data = await postRequest("movies", movie);
     return data;
 };
-
+MoviesData.getTop3 = async function () {
+    let data = await getRequest("movies/top3");
+    return data;
+};
 
 export { MoviesData };
