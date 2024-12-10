@@ -27,4 +27,9 @@ SalesData.getSalesEvolution = async function () {
     return data;
 };
 
+SalesData.salesGenreEvolution = async function () {
+    let data = await getRequest("sales/salesGenreEvolution");
+    return data;
+}
+
 export { SalesData };
