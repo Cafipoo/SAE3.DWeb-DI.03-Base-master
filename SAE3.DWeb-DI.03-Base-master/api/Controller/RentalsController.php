@@ -14,8 +14,12 @@ class RentalsController extends Controller {
         $id = $request->getId("id");
         if ($id) {
             if ($id == "rentalThisMonth") {
-                return $this->getTotalRentalsForThisMonth();
-            } else {
+                return $this->rentals->getTotalRentalsForThisMonth();
+            } 
+            else if ($id == "rentalEvolution") {
+                return $this->rentals->getRentalsEvolution();
+            }
+            else {
                 $rental = $this->rentals->find($id);
                 return $rental == null ? false : $rental;
             }
@@ -23,10 +27,7 @@ class RentalsController extends Controller {
             return $this->rentals->findAll();
         }
     }
-    private function getTotalRentalsForThisMonth() {
-        $totalRentals = $this->rentals->getTotalRentalsForThisMonth();
-        return $totalRentals;
-    }
+
     protected function processPostRequest(HttpRequest $request) {
         $customer_id = $request->getParam("customer_id");
         $movie_id = $request->getParam("movie_id");

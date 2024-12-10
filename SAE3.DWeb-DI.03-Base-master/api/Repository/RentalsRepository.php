@@ -42,6 +42,25 @@ class RentalsRepository extends EntityRepository {
         return $total_rentals;
     }
 
+    public function getRentalsEvolution(): array {
+        $requete = $this->cnx->prepare("
+            SELECT DATE_FORMAT(Rentals.rental_date, '%Y-%m') as month, SUM(Rentals.rental_price) as total_rentals FROM (SELECT rental_date, rental_price FROM Rentals WHERE rental_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH)) Rentals GROUP BY month ORDER BY month DESC;
+        ");
+        $requete->execute();
+    
+        $answer = $requete->fetchAll(PDO::FETCH_OBJ);
+    
+        $result = [];
+        foreach($answer as $obj) {
+            array_push($result, [
+                "month" => $obj->month,
+                "total_rentals" => $obj->total_rentals
+            ]);
+        }
+    
+        return $result;
+    }
+
     public function findAll(): array {
         $requete = $this->cnx->prepare("select * from Rentals");
         $requete->execute();

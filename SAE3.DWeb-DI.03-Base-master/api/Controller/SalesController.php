@@ -14,8 +14,12 @@ class SalesController extends Controller {
         $id = $request->getId("id");
         if ($id) {
             if ($id == "salesThisMonth") {
-                return $this->getTotalSalesForThisMonth();
-            } else {
+                return $this->sales->getTotalSalesForThisMonth();
+            } 
+            else if ($id == "salesEvolution") {
+                return $this->sales->getSalesEvolution();
+            }
+            else {
                 $sale = $this->sales->find($id);
                 return $sale == null ? false : $sale;
             }
@@ -23,11 +27,7 @@ class SalesController extends Controller {
             return $this->sales->findAll();
         }
     }
-    private function getTotalSalesForThisMonth() {
-        $totalSales = $this->sales->getTotalSalesForThisMonth();
-        return $totalSales;
-    }
-    
+
     protected function processPostRequest(HttpRequest $request) {
         $id = $request->getId();
     
