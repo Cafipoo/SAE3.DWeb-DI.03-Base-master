@@ -60,6 +60,26 @@ class SalesRepository extends EntityRepository {
         return $result;
     }
 
+    public function salesGenreEvolution(): array {
+        $requete = $this->cnx->prepare("
+            SELECT DATE_FORMAT(Sales.purchase_date, '%Y-%m') as month, Movies.genre,SUM(Sales.purchase_price) as total_sales FROM Sales JOIN Movies ON Sales.movie_id = Movies.id WHERE Sales.purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH) GROUP BY month, Movies.genre ORDER BY month DESC, Movies.genre;
+        ");
+        $requete->execute();
+    
+        $answer = $requete->fetchAll(PDO::FETCH_OBJ);
+    
+        $result = [];
+        foreach($answer as $obj) {
+            array_push($result, [
+                "month" => $obj->month,
+                "genre" => $obj->genre,
+                "total_sales" => $obj->total_sales
+            ]);
+        }
+    
+        return $result;
+    }
+
     public function findAll(): array {
         $requete = $this->cnx->prepare("select * from Sales");
         $requete->execute();

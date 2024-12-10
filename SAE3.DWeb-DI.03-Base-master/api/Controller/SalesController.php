@@ -19,6 +19,9 @@ class SalesController extends Controller {
             else if ($id == "salesEvolution") {
                 return $this->sales->getSalesEvolution();
             }
+            else if ($id == "salesGenreEvolution") {
+                return $this->sales->salesGenreEvolution();
+            }
             else {
                 $sale = $this->sales->find($id);
                 return $sale == null ? false : $sale;

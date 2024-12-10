@@ -19,6 +19,9 @@ class RentalsController extends Controller {
             else if ($id == "rentalEvolution") {
                 return $this->rentals->getRentalsEvolution();
             }
+            else if ($id == "rentalGenreEvolution") {
+                return $this->rentals->rentalGenreEvolution();
+            }
             else {
                 $rental = $this->rentals->find($id);
                 return $rental == null ? false : $rental;
