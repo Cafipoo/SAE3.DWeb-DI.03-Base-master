@@ -75,7 +75,7 @@ class MoviesRepository extends EntityRepository {
     }
 
     public function movieCustomer($customer): array {
-        $requete = $this->cnx->prepare("SELECT c.first_name, c.last_name, m.genre, COUNT(*) AS count FROM Rentals r JOIN Movies m ON r.movie_id = m.id JOIN Customers c ON r.customer_id = c.id WHERE r.customer_id = :customer GROUP BY m.genre, c.first_name, c.last_name ORDER BY count DESC");
+        $requete = $this->cnx->prepare("SELECT c.first_name, c.last_name, m.genre, m.movie_title FROM Rentals r JOIN Movies m ON r.movie_id = m.id JOIN Customers c ON r.customer_id = c.id WHERE r.customer_id = :customer ORDER BY m.genre, m.movie_title");
         $requete->bindParam(':customer', $customer);
         $requete->execute();
 
@@ -89,7 +89,7 @@ class MoviesRepository extends EntityRepository {
                 "genre" => $answer->genre,
                 "first_name" => $answer->first_name,
                 "last_name" => $answer->last_name,
-                "count" => $answer->count
+                "movie_title" => $answer->movie_title
             ]);
         }
         return $result;
