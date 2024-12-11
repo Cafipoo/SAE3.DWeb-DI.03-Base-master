@@ -4,9 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAE3.DWeb-DI.03 base code</title>
+    <!-- Inclure ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <link rel="stylesheet" href="./src/dist/output.css">
+
 </head>
 <body class="bg-gray-100">
+    <!-- Conteneur pour le graphique -->
     <section id="header"></section>
+    <section id="movie"></section>
+    <section id="top"></section>
+    <section id="evolution"></section>
+    <select id="genreSelect">
+        <option value="sales">Sales</option>
+        <option value="rentals">Rentals</option>
+    </select>
+    <section id="genre"></section>
+    <select name="country" id="country"></select>
+    <section id="countryData"></section>
+
+    
+    <!-- Lien vers le script principal -->
     <script type="module" src="src/main.js"></script>
 </body>
 </html>
