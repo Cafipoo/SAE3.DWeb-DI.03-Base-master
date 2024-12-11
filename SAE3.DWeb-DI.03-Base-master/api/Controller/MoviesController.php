@@ -20,6 +20,10 @@ class MoviesController extends Controller {
                 $movie_title = $request->getParam("movie_title");
                 return $this->movies->historyByTitle($movie_title);
             }
+            else if ($id == "movie"){
+                $customer = $request->getParam("customer");
+                return $this->movies->movieCustomer($customer);
+            }
             else {
                 $sale = $this->movies->find($id);
                 return $sale == null ? false : $sale;

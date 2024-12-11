@@ -1,6 +1,6 @@
 <?php
 
-class Customers {
+class Customers implements JsonSerializable {
     private int $id;
     private string $first_name;
     private string $last_name;
@@ -10,15 +10,15 @@ class Customers {
     private float $lat;
     private float $lng;
 
-    public function __construct($id, $first_name, $last_name, $email, $country, $city, $lat, $lng) {
-        $this->id = $id;
-        $this->first_name = $first_name;
-        $this->last_name = $last_name;
-        $this->email = $email;
-        $this->country = $country;
-        $this->city = $city;
-        $this->lat = $lat;
-        $this->lng = $lng;
+    public function __construct(array $data) {
+        $this->id = $data["id"];
+        $this->first_name = $data["first_name"];
+        $this->last_name = $data["last_name"];
+        $this->email = $data["email"];
+        $this->country = $data["country"];
+        $this->city = $data["city"];
+        $this->lat = $data["lat"];
+        $this->lng = $data["lng"];
     }
 
     public function getId() {
@@ -51,6 +51,19 @@ class Customers {
 
     public function getLng() {
         return $this->lng;
+    }
+
+    public function jsonSerialize() {
+        return [
+            'id' => $this->id,
+            'first_name' => $this->first_name,
+            'last_name' => $this->last_name,
+            'email' => $this->email,
+            'country' => $this->country,
+            'city' => $this->city,
+            'lat' => $this->lat,
+            'lng' => $this->lng
+        ];
     }
 
     public function setId($id) {

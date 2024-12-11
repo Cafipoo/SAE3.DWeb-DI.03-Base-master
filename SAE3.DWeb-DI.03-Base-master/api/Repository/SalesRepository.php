@@ -43,7 +43,7 @@ class SalesRepository extends EntityRepository {
 
     public function getSalesEvolution(): array {
         $requete = $this->cnx->prepare("
-            SELECT DATE_FORMAT(Sales.purchase_date, '%Y-%m') as month, SUM(Sales.purchase_price) as total_sales FROM (SELECT purchase_date, purchase_price FROM Sales WHERE purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH)) Sales GROUP BY month ORDER BY month DESC;
+            SELECT DATE_FORMAT(Sales.purchase_date, '%Y-%m') as month, COUNT(Sales.purchase_price) as total_sales FROM (SELECT purchase_date, purchase_price FROM Sales WHERE purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH)) Sales GROUP BY month ORDER BY month DESC;
         ");
         $requete->execute();
     

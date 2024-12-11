@@ -44,7 +44,7 @@ class RentalsRepository extends EntityRepository {
 
     public function getRentalsEvolution(): array {
         $requete = $this->cnx->prepare("
-            SELECT DATE_FORMAT(Rentals.rental_date, '%Y-%m') as month, SUM(Rentals.rental_price) as total_rentals FROM (SELECT rental_date, rental_price FROM Rentals WHERE rental_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH)) Rentals GROUP BY month ORDER BY month DESC;
+            SELECT DATE_FORMAT(Rentals.rental_date, '%Y-%m') as month, COUNT(Rentals.rental_price) as total_rentals FROM (SELECT rental_date, rental_price FROM Rentals WHERE rental_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH)) Rentals GROUP BY month ORDER BY month DESC;
         ");
         $requete->execute();
     
