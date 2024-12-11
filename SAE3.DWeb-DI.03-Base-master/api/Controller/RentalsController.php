@@ -25,6 +25,7 @@ class RentalsController extends Controller {
             else if ($id == "rentalByCountry") {
                 return $this->rentals->rentalByCountry();
             }
+
             else {
                 $rental = $this->rentals->find($id);
                 return $rental == null ? false : $rental;

@@ -14,18 +14,19 @@ class MoviesController extends Controller {
         $id = $request->getId("id");
         if ($id) {
             if ($id == "top3") {
-                return $this->getTop3();
-            } else {
+                return $this->movies->getTop3();
+            } 
+            else if ($id == "historyByTitle") {
+                $movie_title = $request->getParam("movie_title");
+                return $this->movies->historyByTitle($movie_title);
+            }
+            else {
                 $sale = $this->movies->find($id);
                 return $sale == null ? false : $sale;
             }
         } else {
             return $this->movies->findAll();
         }
-    }
-    private function getTop3() {
-        $top3 = $this->movies->getTop3();
-        return $top3;
     }
     
     protected function processPostRequest(HttpRequest $request) {

@@ -52,6 +52,28 @@ class MoviesRepository extends EntityRepository {
         return $result;
     }
 
+    public function historyByTitle($movie_title): array {
+        $requete = $this->cnx->prepare("SELECT DATE_FORMAT(date_range.month, '%Y-%m') AS month, COALESCE(SUM(CASE WHEN r.rental_price IS NOT NULL THEN 1 ELSE 0 END), 0) AS rentals_count, 0 AS sales_count FROM (SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS month UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 4 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 MONTH), '%Y-%m-01')) AS date_range LEFT JOIN Rentals r ON DATE_FORMAT(r.rental_date, '%Y-%m') = DATE_FORMAT(date_range.month, '%Y-%m') AND r.movie_id = (SELECT id FROM Movies WHERE movie_title = :movie_title) GROUP BY date_range.month ORDER BY date_range.month;
+        ");
+        $requete->bindParam(':movie_title', $movie_title);
+        $requete->execute();
+    
+        $answers = $requete->fetchAll(PDO::FETCH_OBJ);
+    
+        if ($answers == false) return [];
+    
+        $result = [];
+        foreach($answers as $answer) {
+            array_push($result,[
+                "month" => $answer->month,
+                "rentals_count" => $answer->rentals_count,
+                "sales_count" => $answer->sales_count,
+            ]);
+        }
+    
+        return $result;
+    }
+
     public function findAll(): array {
         $requete = $this->cnx->prepare("select * from Movies");
         $requete->execute();
