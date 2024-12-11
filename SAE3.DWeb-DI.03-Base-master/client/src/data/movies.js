@@ -20,5 +20,8 @@ MoviesData.getTop3 = async function () {
     let data = await getRequest("movies/top3");
     return data;
 };
-
+MoviesData.historyByTitle = async function (movie_title) {
+    let data = await getRequest("movies/historyByTitle?movie_title="+movie_title);
+    return data;
+}
 export { MoviesData };

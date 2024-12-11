@@ -6,6 +6,7 @@ import { RentalsData } from "./data/rentals.js";
 import { EvoView } from "./ui/evolution/index.js";
 import {GenreView} from "./ui/genre/index.js";
 import {CountryView} from "./ui/country/index.js";
+import { HistoryView } from "./ui/history/index.js";
 
 let C = {};
 
@@ -20,6 +21,7 @@ let V = {
     evolution: document.querySelector("#evolution"),
     genre: document.querySelector("#genre"),
     country: document.querySelector("#country"),
+    history: document.querySelector("#historySelect"),
 };
 
 V.init = function(){
@@ -62,16 +64,13 @@ C.loadGenre = async function(){
 
     if (selectedOption === "sales") {
         let dataSales = await SalesData.salesGenreEvolution();
-        console.log(1);
         V.renderGenre(dataSales, []);
     } else if (selectedOption === "rentals") {
         let dataRent = await RentalsData.rentalGenreEvolution();
-        console.log(2);
         V.renderGenre([], dataRent);
     } else {
         let dataSales = await SalesData.salesGenreEvolution();
         let dataRent = await RentalsData.rentalGenreEvolution();
-        console.log(3);
         V.renderGenre(dataSales, dataRent);
     }
 }
@@ -85,15 +84,84 @@ C.loadCountry = async function(){
         console.error("Error loading country:", error);
     }
 }
+
+let chart; // Déclarez une variable globale pour stocker l'instance du graphique
+
+C.loadHistory = async function() {
+    let movie_title = document.querySelector("#historySelect").value;
+    try {
+        let data = await MoviesData.historyByTitle(movie_title);
+        let data2 = [];
+        if (!movie_title) {
+            data2 = await MoviesData.fetchAll();
+        }
+        V.renderHistory(data, data2);
+    } catch (error) {
+        console.error("Error loading history:", error);
+    }
+}
+
+V.renderHistory = function(data, data2) {
+    if (!V.history.innerHTML) {
+        V.history.innerHTML = HistoryView.render(data2);
+    }
+    let movie_title = document.querySelector("#historySelect").value;
+    
+    let dataRent = data.map(item => item.rentals_count);
+    let dataSales = data.map(item => item.sales_count);
+    var options = {
+        series: [{
+            name: "Rentals Evolution",
+            data: dataRent
+        }, {
+            name: "Sales Evolution",
+            data: dataSales
+        }],
+        chart: {
+            height: 350,
+            type: 'line',
+            zoom: {
+                enabled: false
+            }
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            curve: 'straight'
+        },
+        title: {
+            text: 'Rentals and Sales Evolution last 6 months for ' + movie_title,
+            align: 'left'
+        },
+        grid: {
+            row: {
+                colors: ['#f3f3f3', 'transparent'],
+                opacity: 0.5
+            },
+        },
+        xaxis: {
+            categories: data.map(item => item.month),
+        }
+    };
+
+    if (chart) {
+        chart.destroy(); // Détruisez le graphique précédent s'il existe
+    }
+
+    chart = new ApexCharts(document.querySelector("#history"), options);
+    chart.render();
+}
+
+document.querySelector("#historySelect").addEventListener("change", C.loadHistory);
+
 V.renderCountry = function(data, data2){
     if (!V.country.innerHTML) {
         V.country.innerHTML = CountryView.render(data, data2);
     }
     let selectedOption = document.querySelector("#country").value;
-    console.log(selectedOption);
     let filteredData = data.filter(item => item.country === selectedOption);
     let filteredData2 = data2.filter(item => item.country === selectedOption);
-    console.log(filteredData, filteredData2);
     let totalSales = filteredData.reduce((acc, item) => acc + item.total_sales, 0);
     let totalRentals = filteredData2.reduce((acc, item) => acc + item.total_rentals, 0);
     var options = {
@@ -143,9 +211,7 @@ document.querySelector("#country").addEventListener("change", C.loadCountry);
 
 V.renderGenre = function(dataSales, dataRent){
     V.genre.innerHTML = GenreView.render();
-    console.log(dataSales, dataRent);
     let data = dataSales.concat(dataRent);  
-    console.log(data); 
     var genres = ['Animation', 'Comedy', 'Drama', 'Sci-Fi', 'Thriller', 'Action', 'Romance', 'Horror'];
     var months = [...new Set(data.map(item => item.month).reverse().filter((_, index) => index % 8 === 0))];
     
@@ -164,7 +230,6 @@ V.renderGenre = function(dataSales, dataRent){
         var colorPalette = ['#008FFB', '#00E396', '#775DD0', '#FEB019', '#FF4560', '#A2A2A4', '#8D6E63', '#E9EB58'];
         return colorPalette[index % colorPalette.length];
     }
-    console.log("test");
     var options = {
         series: series,
         chart: {
@@ -231,7 +296,6 @@ document.querySelector("#genreSelect").addEventListener("change", C.loadGenre);
 
 V.renderEvolution = function(data, data2){
     V.evolution.innerHTML = EvoView.render(data, data2);
-    console.log(data, data2);
     var options = {
         series: [{
             name: "Rentals Evolution",
@@ -278,7 +342,6 @@ V.renderTop= function(dataTop){
 
 V.renderMovies = function(data, data2){
     V.movies.innerHTML = MoviesView.render(data, data2);
-    console.log(data,data2);
     const currentDate = new Date();
     const currentMonthYear = currentDate.toISOString().slice(0, 7);
 
@@ -326,4 +389,5 @@ C.loadMovies();
 C.loadEvolution();
 C.loadGenre();
 C.loadCountry();
+C.loadHistory();
 C.init();
