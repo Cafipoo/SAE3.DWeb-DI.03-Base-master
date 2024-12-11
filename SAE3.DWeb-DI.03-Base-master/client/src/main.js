@@ -7,6 +7,8 @@ import { EvoView } from "./ui/evolution/index.js";
 import {GenreView} from "./ui/genre/index.js";
 import {CountryView} from "./ui/country/index.js";
 import { HistoryView } from "./ui/history/index.js";
+import { CustomerData } from "./data/customers.js";
+import { CustomerView } from "./ui/customer/index.js";
 
 let C = {};
 
@@ -22,6 +24,7 @@ let V = {
     genre: document.querySelector("#genre"),
     country: document.querySelector("#country"),
     history: document.querySelector("#historySelect"),
+    customerName: document.querySelector("#customerName"),
 };
 
 V.init = function(){
@@ -75,6 +78,7 @@ C.loadGenre = async function(){
     }
 }
 
+
 C.loadCountry = async function(){
     try {
         let data = await SalesData.SalesByCountry();
@@ -100,6 +104,58 @@ C.loadHistory = async function() {
         console.error("Error loading history:", error);
     }
 }
+C.loadCustomer = async function(){
+    let customer = document.querySelector("#customerName").value;
+    if (!customer || customer === "0") {
+        customer = "1";
+    }
+    try {
+        let data = await MoviesData.movieCustomer(customer);
+        let data2 = [];
+        let customerName = document.querySelector("#customerName").value;
+
+        if (!customerName) {
+            data2 = await CustomerData.fetchAll();
+        }
+        V.renderCustomer(data, data2);
+        
+    } catch (error) {
+        console.error("Error loading customers:", error);
+    }
+}
+let chart2;
+V.renderCustomer = function(data,data2){
+    if (!V.customerName.innerHTML) {
+        V.customerName.innerHTML = CustomerView.render(data2);
+    }
+    var options = {
+        series: data.map(item => item.count),
+        chart: {
+        width: 380,
+        type: 'pie',
+      },
+      labels: data.map(item => item.genre),
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          chart: {
+            width: 200
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }]
+      };
+      if (chart2) {
+        chart2.destroy();
+    }
+      chart2 = new ApexCharts(document.querySelector("#customer"), options);
+      chart2.render();
+}
+
+document.querySelector("#customerName").addEventListener("change", C.loadCustomer);
+
 
 V.renderHistory = function(data, data2) {
     if (!V.history.innerHTML) {
@@ -146,7 +202,7 @@ V.renderHistory = function(data, data2) {
     };
 
     if (chart) {
-        chart.destroy(); // Détruisez le graphique précédent s'il existe
+        chart.destroy();
     }
 
     chart = new ApexCharts(document.querySelector("#history"), options);
@@ -390,4 +446,5 @@ C.loadEvolution();
 C.loadGenre();
 C.loadCountry();
 C.loadHistory();
+C.loadCustomer();
 C.init();

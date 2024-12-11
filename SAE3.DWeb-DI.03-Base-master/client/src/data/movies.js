@@ -24,4 +24,8 @@ MoviesData.historyByTitle = async function (movie_title) {
     let data = await getRequest("movies/historyByTitle?movie_title="+movie_title);
     return data;
 }
+MoviesData.movieCustomer = async function (id) {
+    let data = await getRequest("movies/movie?customer="+id);
+    return data;
+}
 export { MoviesData };
