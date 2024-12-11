@@ -20,6 +20,7 @@ let V = {
     // header: document.querySelector("#header"),
     movies: document.querySelector("#movie"),
     top3: document.querySelector("#top"),
+    topRentals: document.querySelector("#topRentals"),
     evolution: document.querySelector("#evolution"),
     genre: document.querySelector("#genre"),
     country: document.querySelector("#country"),
@@ -36,7 +37,12 @@ V.init = function(){
 C.loadTop = async function(){
     try {
         let dataTop = await MoviesData.getTop3();
-        V.renderTop(dataTop);
+        let dataSales = dataTop.slice(0, 3);
+        let dataRentals = dataTop.slice(3);
+        console.log(dataSales);
+        console.log(dataRentals);
+        V.renderTop(dataSales, dataRentals);
+
     } catch (error) {
         console.error("Error loading top movies:", error);
     }
@@ -128,25 +134,41 @@ V.renderCustomer = function(data,data2){
     if (!V.customerName.innerHTML) {
         V.customerName.innerHTML = CustomerView.render(data2);
     }
+    console.log(data);
+    let genreCounts = data.reduce((acc, item) => {
+        acc[item.genre] = (acc[item.genre] || 0) + 1;
+        return acc;
+    }, {});
+
     var options = {
-        series: data.map(item => item.count),
+        series: Object.values(genreCounts),
         chart: {
-        width: 380,
-        type: 'pie',
-      },
-      labels: data.map(item => item.genre),
-      responsive: [{
-        breakpoint: 480,
-        options: {
-          chart: {
-            width: 200
-          },
-          legend: {
-            position: 'bottom'
-          }
-        }
-      }]
-      };
+            width: 380,
+            type: 'pie',
+        },
+        labels: Object.keys(genreCounts),
+        tooltip: {
+            y: {
+                formatter: function(value, { series, seriesIndex, dataPointIndex, w }) {
+                    let genre = Object.keys(genreCounts)[dataPointIndex];
+                    let moviesInGenre = data.filter(item => item.genre === genre).map(item => item.movie_title).join(",\n");
+                    return genre + ": " + value + " (" + moviesInGenre + ")";
+                    
+                }
+            }
+        },
+        responsive: [{
+            breakpoint: 480,
+            options: {
+                chart: {
+                    width: 200
+                },
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }]
+    };
       if (chart2) {
         chart2.destroy();
     }
@@ -212,48 +234,34 @@ V.renderHistory = function(data, data2) {
 document.querySelector("#historySelect").addEventListener("change", C.loadHistory);
 
 V.renderCountry = function(data, data2){
-    if (!V.country.innerHTML) {
-        V.country.innerHTML = CountryView.render(data, data2);
-    }
-    let selectedOption = document.querySelector("#country").value;
-    let filteredData = data.filter(item => item.country === selectedOption);
-    let filteredData2 = data2.filter(item => item.country === selectedOption);
-    let totalSales = filteredData.reduce((acc, item) => acc + item.total_sales, 0);
-    let totalRentals = filteredData2.reduce((acc, item) => acc + item.total_rentals, 0);
     var options = {
-        series: [{
-            name: "sales",
-            data: [{
-                x: " Top vente",
-                y: totalSales,
-            },
-            {
-                x:" Top location",
-                y: totalRentals,
-            }],
-        }],
-        chart: {
-            type: "bar",
-            height: 380,
+        series: [
+        {
+          name: 'Sales',
+          data: data.map(item => ({
+              x: item.country,
+              y: item.total_sales
+          }))
         },
-        xaxis: {
-            type: "category",
-            labels: {
-                fontWeight: 700,
-            },
-            categories: ["Ventes", "Locations"],
-        },
-        title: {
-            text: "Montant total des ventes et le montant total des locations pour le mois en cours",
-        },
-        yaxis: {
-            labels: {
-                formatter: function (value) {
-                    return value + " €";
-                },
-            },
-        },
-    };
+        {
+          name: 'Rentals',
+          data: data2.map(item => ({
+              x: item.country,
+              y: item.total_rentals
+          }))
+        }
+      ],
+        legend: {
+        show: false
+      },
+      chart: {
+        height: 350,
+        type: 'treemap'
+      },
+      title: {
+        text: 'Sales and Rentals by Country',
+      }
+      };
 
     if (V.chart) {
         V.chart.updateOptions(options);
@@ -262,8 +270,6 @@ V.renderCountry = function(data, data2){
         V.chart.render();
     }
 }
-
-document.querySelector("#country").addEventListener("change", C.loadCountry);
 
 V.renderGenre = function(dataSales, dataRent){
     V.genre.innerHTML = GenreView.render();
@@ -312,7 +318,7 @@ V.renderGenre = function(dataSales, dataRent){
             colors: ['#fff']
         },
         title: {
-            text: 'Genre Sales Evolution'
+            text: 'Genre Sales Evolution last 6 months',
         },
         xaxis: {
             categories: months,
@@ -392,8 +398,11 @@ V.renderEvolution = function(data, data2){
         chart.render();
 }
 
-V.renderTop= function(dataTop){
+V.renderTop= function(dataTop, dataTop2){
+    console.log(dataTop, dataTop2);
     V.top3.innerHTML = TopView.render(dataTop);
+    V.topRentals.innerHTML = TopView.render(dataTop2);
+    
 }
 
 V.renderMovies = function(data, data2){
@@ -405,17 +414,19 @@ V.renderMovies = function(data, data2){
         series: [{
             name: "sales",
             data: [{
-                x: " Top vente du " + currentMonthYear ,
+                x: "Top vente du " + currentMonthYear,
                 y: data,
+                fillColor: '#008FFB'
             },
             {
-                x:" Top location du " + currentMonthYear,
+                x: "Top location du " + currentMonthYear,
                 y: data2,
+                fillColor: '#00E396'
             }],
         }],
         chart: {
             type: "bar",
-            height: 380,
+            height: 403.75,
         },
         xaxis: {
             type: "category",
@@ -433,7 +444,7 @@ V.renderMovies = function(data, data2){
                     return value + " €";
                 },
             },
-        },
+        }
     };
 
     var chart = new ApexCharts(document.querySelector("#chart"), options);

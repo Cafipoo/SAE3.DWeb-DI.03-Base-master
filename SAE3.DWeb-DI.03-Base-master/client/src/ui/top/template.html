@@ -1,8 +1,12 @@
-<div class="top flex flex-col flex-wrap">
-    <h1 class="font-sans">{{movie_title}}</h1>
-    <p>{{genre}}</p>
-    <p>{{release_date}}</p>
-    <div class="flex content-between"></div>
-    <p>{{duration_minutes}} minutes</p>
-    <p>{{rating}}</p>
+<div class="top flex flex-col flex-wrap bg-blue-color text-white px-6 py-4 rounded-lg opacity-90 w-1/3">
+    <h1 class="text-xl h-16">{{movie_title}}</h1>
+    <div class="flex flex-row justify-between bg-green-color p-2 rounded-md">
+        <p>{{genre}}</p>
+    </div>
+
+    <div class="flex flex-row justify-between mt-2">
+        <p>{{duration_minutes}} minutes</p>
+        <p>{{release_date}}</p>
+        <p>{{rating}}</p>
+    </div>
 </div>
