@@ -53,7 +53,32 @@ class MoviesRepository extends EntityRepository {
     }
 
     public function historyByTitle($movie_title): array {
-        $requete = $this->cnx->prepare("SELECT DATE_FORMAT(date_range.month, '%Y-%m') AS month, COALESCE(SUM(CASE WHEN r.rental_price IS NOT NULL THEN 1 ELSE 0 END), 0) AS rentals_count, 0 AS sales_count FROM (SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS month UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 4 MONTH), '%Y-%m-01') UNION ALL SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 MONTH), '%Y-%m-01')) AS date_range LEFT JOIN Rentals r ON DATE_FORMAT(r.rental_date, '%Y-%m') = DATE_FORMAT(date_range.month, '%Y-%m') AND r.movie_id = (SELECT id FROM Movies WHERE movie_title = :movie_title) GROUP BY date_range.month ORDER BY date_range.month;
+        $requete = $this->cnx->prepare("SELECT 
+    DATE_FORMAT(date_range.month, '%Y-%m') AS month,
+    COALESCE(SUM(CASE WHEN r.rental_price IS NOT NULL THEN 1 ELSE 0 END), 0) AS rentals_count,
+    COALESCE(SUM(CASE WHEN s.purchase_price IS NOT NULL THEN 1 ELSE 0 END), 0) AS sales_count
+FROM 
+    (SELECT DATE_FORMAT(CURDATE(), '%Y-%m-01') AS month
+     UNION ALL
+     SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 1 MONTH), '%Y-%m-01')
+     UNION ALL
+     SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 2 MONTH), '%Y-%m-01')
+     UNION ALL
+     SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 3 MONTH), '%Y-%m-01')
+     UNION ALL
+     SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 4 MONTH), '%Y-%m-01')
+     UNION ALL
+     SELECT DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 5 MONTH), '%Y-%m-01')) AS date_range
+LEFT JOIN 
+    Rentals r ON DATE_FORMAT(r.rental_date, '%Y-%m') = DATE_FORMAT(date_range.month, '%Y-%m')
+    AND r.movie_id = (SELECT id FROM Movies WHERE movie_title = :movie_title)
+LEFT JOIN 
+    Sales s ON DATE_FORMAT(s.purchase_date, '%Y-%m') = DATE_FORMAT(date_range.month, '%Y-%m')
+    AND s.movie_id = (SELECT id FROM Movies WHERE movie_title = :movie_title)
+GROUP BY 
+    date_range.month
+ORDER BY 
+    date_range.month;
         ");
         $requete->bindParam(':movie_title', $movie_title);
         $requete->execute();
@@ -71,6 +96,81 @@ class MoviesRepository extends EntityRepository {
             ]);
         }
     
+        return $result;
+    }
+
+    public function movieConsoParPays($month):array{
+        $requete = $this->cnx->prepare("SELECT 
+    country, 
+    month, 
+    SUM(total_gb_consumed) AS total_gb_consumed 
+FROM (
+    SELECT 
+        c.country, 
+        DATE_FORMAT(r.rental_date, '%Y-%m') AS month, 
+        SUM(m.duration_minutes / 60 * 2.7) AS total_gb_consumed 
+    FROM 
+        Rentals r 
+    JOIN 
+        Customers c ON r.customer_id = c.id 
+    JOIN 
+        Movies m ON r.movie_id = m.id 
+    WHERE 
+        DATE_FORMAT(r.rental_date, '%Y-%m') = :month 
+    GROUP BY 
+        c.country, month 
+    UNION ALL 
+    SELECT 
+        c.country, 
+        DATE_FORMAT(s.purchase_date, '%Y-%m') AS month, 
+        SUM(m.duration_minutes / 60 * 2.7) AS total_gb_consumed 
+    FROM 
+        Sales s 
+    JOIN 
+        Customers c ON s.customer_id = c.id 
+    JOIN 
+        Movies m ON s.movie_id = m.id 
+    WHERE 
+        DATE_FORMAT(s.purchase_date, '%Y-%m') = :month 
+    GROUP BY 
+        c.country, month 
+) AS combined_results 
+GROUP BY 
+    country, month 
+ORDER BY 
+    country, month;");
+        $requete->bindParam(':month', $month);
+        $requete->execute();
+
+        $answers = $requete->fetchAll(PDO::FETCH_OBJ);
+
+        if ($answers == false) return [];
+
+        $result = [];
+        foreach($answers as $answer) {
+            array_push($result,[
+                "country" => $answer->country,
+                "month" => $answer->month,
+                "total_gb_consumed" => $answer->total_gb_consumed,
+            ]);
+        }
+        return $result;
+    }
+
+    public function getMonth(): array{
+        $requete = $this->cnx->prepare("SELECT DISTINCT DATE_FORMAT(rental_date, '%Y-%m') AS month FROM Rentals UNION SELECT DISTINCT DATE_FORMAT(purchase_date, '%Y-%m') AS month FROM Sales ORDER BY `month` DESC");
+        $requete->execute();
+
+        $answers = $requete->fetchAll(PDO::FETCH_OBJ);
+
+        if ($answers == false) return [];
+
+        $result = [];
+        foreach($answers as $answer) {
+            array_push($result,[
+                "month" => $answer->month,
+            ]);
+        }
         return $result;
     }
 

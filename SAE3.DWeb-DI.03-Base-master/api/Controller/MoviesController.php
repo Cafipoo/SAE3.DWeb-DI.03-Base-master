@@ -20,6 +20,13 @@ class MoviesController extends Controller {
                 $movie_title = $request->getParam("movie_title");
                 return $this->movies->historyByTitle($movie_title);
             }
+            else if ($id == "movieConsoParPays"){
+                $month = $request->getParam("month");
+                return $this->movies->movieConsoParPays($month);
+            }
+            else if ($id == "getMonth"){
+                return $this->movies->getMonth();
+            }
             else if ($id == "movie"){
                 $customer = $request->getParam("customer");
                 return $this->movies->movieCustomer($customer);
