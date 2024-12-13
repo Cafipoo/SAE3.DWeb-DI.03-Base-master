@@ -1,0 +1,71 @@
+Itération 3
+Select Count From Sales where (date);
+SELECT SUM(amount) AS total_sales
+FROM Sales
+WHERE MONTH(date) = 12
+AND YEAR(date) = YEAR(CURRENT_DATE());
+
+Itération 4
+(
+    SELECT Movies.*, COUNT(Sales.id) as count, 'purchase' as type
+    FROM Sales
+    JOIN Movies ON Sales.movie_id = Movies.id
+    WHERE MONTH(Sales.purchase_date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+    AND YEAR(Sales.purchase_date) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)
+    GROUP BY Movies.id
+    ORDER BY count DESC
+    LIMIT 3
+)
+UNION ALL
+(
+    SELECT Movies.*, COUNT(Rentals.id) as count, 'rental' as type
+    FROM Rentals
+    JOIN Movies ON Rentals.movie_id = Movies.id
+    WHERE MONTH(Rentals.rental_date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+    AND YEAR(Rentals.rental_date) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)
+    GROUP BY Movies.id
+    ORDER BY count DESC
+    LIMIT 3
+)
+
+SELECT Movies.*, Sales.purchase_date, COUNT(Sales.id) as count, 'purchase' as type
+FROM Sales
+JOIN Movies ON Sales.movie_id = Movies.id
+WHERE MONTH(Sales.purchase_date) = MONTH(CURRENT_DATE() - INTERVAL 1 MONTH)
+AND YEAR(Sales.purchase_date) = YEAR(CURRENT_DATE() - INTERVAL 1 MONTH)
+GROUP BY Movies.id, Sales.purchase_date
+ORDER BY count DESC
+LIMIT 3;
+
+Itération 5
+SELECT 
+            DATE_FORMAT(Sales.purchase_date, '%Y-%m') as month,
+            SUM(Sales.purchase_price) as total_sales,
+            SUM(Rentals.rental_price) as total_rentals
+        FROM 
+            (SELECT purchase_date, purchase_price FROM Sales WHERE purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)) Sales
+        LEFT JOIN 
+            (SELECT rental_date, rental_price FROM Rentals WHERE rental_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 6 MONTH)) Rentals
+        ON 
+            DATE_FORMAT(Sales.purchase_date, '%Y-%m') = DATE_FORMAT(Rentals.rental_date, '%Y-%m')
+        GROUP BY 
+            month
+        ORDER BY 
+            month DESC;
+
+
+Itération 6
+SELECT 
+    DATE_FORMAT(Sales.purchase_date, '%Y-%m') as month, 
+    Movies.genre,
+    SUM(Sales.purchase_price) as total_sales 
+FROM 
+    Sales 
+JOIN 
+    Movies ON Sales.movie_id = Movies.id 
+WHERE 
+    Sales.purchase_date >= DATE_SUB(CURRENT_DATE(), INTERVAL 5 MONTH) 
+GROUP BY 
+    month, Movies.genre 
+ORDER BY 
+    month DESC, Movies.genre;

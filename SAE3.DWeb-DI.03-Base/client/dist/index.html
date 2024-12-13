@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAE3.DWeb-DI.03 base code</title>
+    <!-- Inclure ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+
+  <script type="module" crossorigin src="./assets/index-CLISfdkA.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CPJlP7lM.css">
+</head>
+<body class="bg-gray-100 p-10">
+    <div class="flex flex-col gap-10 pb-10 justify-between xl:flex-row">
+        <section id="movie" class="shadow-xl min-h-full bg-white"></section>
+        <div class="bg-white shadow-xl">
+            <select name="customerName" id="customerName"></select>
+            <section class="bg-white" id="customer"></section>
+        </div>
+        <div class="p-3 shadow-xl bg-white w-full">
+            <h1 class="pb-4 text-sm">Top 3 des ventes</h1>
+            <section id="top" class="px-3 gap-4 bg-transparent flex w-full pb-4">
+            </section>
+            <h1 class="pb-4 text-sm">Top 3 des locations</h1>
+            <section id="topRentals" class="px-3 gap-4 bg-transparent flex w-full">
+        </div>
+
+    </div>
+
+    <div class="flex flex-col gap-10 pb-10 justify-between xl:flex-row">
+        <section id="evolution" class="bg-white xl:w-1/3 shadow-xl"></section>
+        <div class="bg-white xl:w-2/3 shadow-xl">
+            <select id="genreSelect">
+                <option value="sales">Sales</option>
+                <option value="rentals">Rentals</option>
+            </select>
+            <section id="genre"></section>
+        </div>
+    </div>
+    <div class="flex flex-col gap-10 pb-10 justify-between xl:flex-row">
+        <section class="bg-white xl:w-2/3 shadow-xl" id="countryData"></section>
+        <div class="bg-white xl:w-1/3 shadow-xl">
+            <select id="historySelect"></select>
+            <section id="history"></section>
+        </div>
+    </div>
+    <div class="flex flex-col gap-10 pb-10 justify-between xl:flex-row">
+        <section class="w-full shadow-xl bg-white" id="conso"></section>
+        <div class="xl:w-96 bg-white shadow-xl">
+            <select name="month" id="month"></select>
+            <section class="bg-white shadow-xl" id="monthData"></section>
+        </div>
+    </div>
+
+
+    
+
+    
+
+    
+    <!-- Lien vers le script principal -->
+
+</body>
+</html>
