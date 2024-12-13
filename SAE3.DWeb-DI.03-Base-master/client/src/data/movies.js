@@ -28,4 +28,12 @@ MoviesData.movieCustomer = async function (id) {
     let data = await getRequest("movies/movie?customer="+id);
     return data;
 }
+MoviesData.movieConsoParPays = async function (month) {
+    let data = await getRequest("movies/movieConsoParPays?month="+ month);
+    return data;
+}
+MoviesData.getMonth = async function () {
+    let data = await getRequest("movies/getMonth");
+    return data;
+}
 export { MoviesData };

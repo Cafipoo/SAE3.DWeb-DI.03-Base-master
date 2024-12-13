@@ -1,9 +1,9 @@
 import { genericRenderer } from "../../lib/utils.js";
-const templateFile = await fetch("src/ui/history/template.html");
+const templateFile = await fetch("src/ui/month/template.html");
 
 const template = await templateFile.text();
 
-let HistoryView = {
+let monthView = {
     render: function(data) {
         let html = "";
         if (!Array.isArray(data)) {
@@ -14,7 +14,6 @@ let HistoryView = {
         }
         return html;
     },
-    
 };
 
-export { HistoryView };
+export { monthView };
