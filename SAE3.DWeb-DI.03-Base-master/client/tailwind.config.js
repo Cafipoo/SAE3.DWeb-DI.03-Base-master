@@ -4,9 +4,18 @@ export default {
     "./blog.html",
     "./index.html",
     "./src/**/*.{inc,html}",
+    "./src/**/**/*.{inc,html}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'sans': 'Helvetica, Arial, sans-serif',
+      },
+      colors: {
+        'blue-color': 'var(--clr-blue)',
+        'green-color': 'var(--clr-green)',
+      },
+    },
   },
   plugins: [],
 }

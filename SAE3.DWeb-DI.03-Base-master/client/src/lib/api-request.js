@@ -4,7 +4,7 @@
  */
 
 
-let API_URL = "TO BE DEFINED"; // URL de base de l'API (à définir)
+let API_URL = "https://mmi.unilim.fr/~lajudie6/SAE3.DWeb-DI.03-Base/api/"; // URL de base de l'API (à définir)
 
 
 /**
