@@ -29,6 +29,7 @@ let V = {
     customerName: document.querySelector("#customerName"),
     month: document.querySelector("#month"),
     monthData: document.querySelector("#monthData"),
+    conso: document.querySelector("#conso"),
 };
 
 V.init = async function(){
@@ -41,6 +42,7 @@ V.init = async function(){
     C.loadCustomer();
     await C.loadMonth();
     C.loadConsommation();
+    C.loadConso();
     
 }
 
@@ -197,7 +199,6 @@ V.renderGenre = function(dataSales, dataRent){
     let data = dataSales.concat(dataRent);  
     var genres = ['Animation', 'Comedy', 'Drama', 'Sci-Fi', 'Thriller', 'Action', 'Romance', 'Horror'];
     var months = [...new Set(data.map(item => item.month))].sort();
-    console.log(data);
     var series = genres.map((genre, index) => {
         return {
             name: genre,
@@ -330,7 +331,6 @@ let chart;
 /*Itération 8 pour un film selectionner afficher l'évolution de ses ventes et locations */
 C.loadHistory = async function() {
     let movie_title = document.querySelector("#historySelect").value;
-    console.log(movie_title);
     if (!movie_title || movie_title === "0") {
         movie_title = "Love Is All There Is";
     }
@@ -425,7 +425,6 @@ V.renderCustomer = function(data,data2){
     if (!V.customerName.innerHTML) {
         V.customerName.innerHTML = CustomerView.render(data2);
     }
-    console.log(data);
     let genreCounts = data.reduce((acc, item) => {
         acc[item.genre] = (acc[item.genre] || 0) + 1;
         return acc;
@@ -473,7 +472,6 @@ document.querySelector("#customerName").addEventListener("change", C.loadCustome
 C.loadMonth = async function(){
     try {
         let data = await MoviesData.getMonth();
-        console.log(data);
         V.renderMonth(data);
     } catch (error) {
         console.error("Error loading month:", error);
@@ -487,10 +485,8 @@ V.renderMonth = function(data){
 /*Itération 11 affichage des consommations par pays/mois*/
 C.loadConsommation = async function(){
     let month = document.querySelector("#month").value;
-    console.log(month);
     try {
         let data = await MoviesData.movieConsoParPays(month);
-        console.log(data);
         V.renderConsommation(data);
     } catch (error) {
         console.error("Error loading country:", error);
@@ -524,5 +520,74 @@ V.renderConsommation = function(data){
 }
 
 document.querySelector("#month").addEventListener("change", C.loadConsommation);
+
+/*Itération 11/2 visualisation de la 11 de manière plus globale */
+C.loadConso = async function(){
+    try {
+        let seriesData = [];
+        let categories = [];
+        const countries = ["Austria", "Denmark", "France", "Germany", "Greece", "Portugal", "Sweden", "United Kingdom", "Spain"];
+        
+        for (let i = 0; i < 12; i++) {
+            let date = new Date();
+            date.setMonth(date.getMonth() - i);
+            let month = date.toISOString().slice(0, 7);
+            categories.push(month);
+            let monthlyData = await MoviesData.movieConsoParPays(month);
+            
+            countries.forEach(country => {
+            let countryData = monthlyData.find(item => item.country === country);
+            seriesData.push({
+                country: country,
+                name: month,
+                data: countryData ? countryData.total_gb_consumed : 0
+            });
+            });
+        }
+        seriesData = seriesData.reverse();
+        V.renderConso(seriesData);
+    } catch (error) {
+        console.error("Error loading consumption data:", error);
+    }
+}
+V.renderConso = function(data){
+    var options = {
+        series: data.reduce((acc, item) => {
+            let countrySeries = acc.find(series => series.name === item.country);
+            if (!countrySeries) {
+                countrySeries = { name: item.country, data: [] };
+                acc.push(countrySeries);
+            }
+            countrySeries.data.push({ x: item.name, y: item.data });
+            return acc;
+        }, []),
+        chart: {
+            height: 350,
+            type: 'heatmap',
+        },
+        dataLabels: {
+            enabled: false
+        },
+        colors: ["#008FFB"],
+        title: {
+            text: 'Go consommé par pays',
+        },
+        xaxis: {
+            type: 'category',
+            categories: [...new Set(data.map(item => item.name))].sort(),
+            title: {
+                text: 'Date'
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Pays'
+            }
+        }
+    };
+
+      var chart = new ApexCharts(document.querySelector("#conso"), options);
+      chart.render();
+}
 
 C.init();
